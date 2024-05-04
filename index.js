@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 require('dotenv').config()
 const port = process.env.PORT || 5000
@@ -29,6 +29,7 @@ async function run() {
         // await client.connect();
         // Send a ping to confirm a successful connection
         const serviceCollection = client.db('carDoctor').collection('services');
+        const bookingsCollection = client.db('carDoctor').collection('bookings');
 
         app.get('/services', async (req, res) => {
             const cursor = serviceCollection.find();
@@ -48,6 +49,13 @@ async function run() {
 
             const result = await serviceCollection.findOne(query, options);
             res.send(result);
+        })
+
+
+
+        //booking
+        app.post('/bookings', async(req,res)=>{
+            const booking = req.body;
         })
 
         
