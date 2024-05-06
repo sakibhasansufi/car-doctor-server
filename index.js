@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 require('dotenv').config()
@@ -31,11 +32,26 @@ async function run() {
         const serviceCollection = client.db('carDoctor').collection('services');
         const bookingsCollection = client.db('carDoctor').collection('bookings');
 
+
+
+
+        // auth related api 
+        app.post('/jwt',async(req,res)=>{
+            const user = req.body;
+            console.log(user);
+            const token =jwt.sign(user, 'secret', {expiresIn : '1h'})
+            res.send(token);
+        })
+
+        // service 
+
         app.get('/services', async (req, res) => {
             const cursor = serviceCollection.find();
             const result = await cursor.toArray();
             res.send(result);
         })
+
+
 
 
         app.get('/services/:id', async (req, res) => {
@@ -54,8 +70,6 @@ async function run() {
 
 
         //booking
-
-
         app.get('/bookings', async(req,res)=>{
             console.log(req.query.email);
             let query = {};
@@ -66,11 +80,31 @@ async function run() {
             res.send(result);
         })
 
+
+
         app.post('/bookings', async(req,res)=>{
             const booking = req.body;
             const result = await bookingsCollection.insertOne(booking);
             res.send(result)
         })
+
+
+
+        app.patch('/bookings/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updatedBooking = req.body;
+            console.log(updatedBooking);
+            const updateDoc = {
+                $set: {
+                    status: updatedBooking.status
+                },
+            };
+            const result = await bookingsCollection.updateOne(filter, updateDoc);
+            res.send(result);
+        })
+
+
 
 
         app.delete('/bookings/:id',async(req,res)=>{
